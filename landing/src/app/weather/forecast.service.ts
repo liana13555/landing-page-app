@@ -1,8 +1,20 @@
 import { getCurrencySymbol } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map, switchMap, pluck, mergeMap, filter, toArray, share } from "rxjs/operators";
+import { Observable, of, throwError } from 'rxjs';
+import {
+  map,
+  switchMap,
+  pluck,
+  mergeMap,
+  filter,
+  toArray,
+  share,
+  tap,
+  catchError,
+  retry
+} from "rxjs/operators";
+import { NotificationsService } from "../notifications/notifications.service";
 import { API_KEY } from '../../environments/api-keys'
 
 interface OpenWeatherResponse {
@@ -20,7 +32,10 @@ interface OpenWeatherResponse {
 export class ForecastService {
   private url = 'https://api.openweathermap.org/data/2.5/forecast'
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private notificationsService: NotificationsService
+  ) {}
 
   getForecast() {
     return this.getCurrentLocation()
@@ -42,11 +57,11 @@ export class ForecastService {
             dateString: value.dt_txt,
             temp: value.main.temp
           }
-        }), 
+        }),
         toArray(), share()
     )
   }
-  
+
   getCurrentLocation() {
     return new Observable<GeolocationCoordinates>((observer) => {
       window.navigator.geolocation.getCurrentPosition(
@@ -56,6 +71,18 @@ export class ForecastService {
         },
         (err) => observer.error(err)
       )
-    })
+    }).pipe(
+      retry(1),
+      tap(() => {
+        this.notificationsService.addSuccess('Got your location')
+      },),
+      catchError((err) => {
+        // #1 - Handle the error
+        this.notificationsService.addError('Failed get your location')
+
+        // #2 - Return a new observable (we can emit value to float throughout the rest of pipeline - emit a default location => coordinates )
+        return throwError(err)
+      })
+    )
   }
 }
