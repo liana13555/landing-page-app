@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, switchMap, pluck, mergeMap, filter, toArray, share } from "rxjs/operators";
-import { API_KEY } from './environment'
+import { API_KEY } from '../../environments/api-keys'
 
 interface OpenWeatherResponse {
   list: {
