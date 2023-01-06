@@ -3,9 +3,12 @@ import { Subject, Observable } from "rxjs";
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, switchMap, tap } from "rxjs/operators";
 
-interface Article {
+export interface Article {
   title: string
   url: string
+  source: {
+    name: string
+  }
 }
 
 interface NewsApiResponse {
