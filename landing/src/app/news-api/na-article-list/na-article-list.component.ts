@@ -10,12 +10,11 @@ export class NaArticleListComponent implements OnInit {
   articles!: Article[]
 
   constructor(private newsApiService: NewsApiService) {
-  this.newsApiService.pagesOutput.subscribe(articles => {
+    this.newsApiService.pagesOutput.subscribe(articles => {
       this.articles = articles
-  })
+    })
     this.newsApiService.getPage(1)
   }
 
   ngOnInit(): void{}
-
 }
